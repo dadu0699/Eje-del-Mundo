@@ -3,7 +3,7 @@ const mysql = require('mysql');
 const params = {
     host: '127.0.0.1',
     user: 'root',
-    password: '',
+    password: 'root',
     database: 'practicaMIA',
     multipleStatements: true
 };

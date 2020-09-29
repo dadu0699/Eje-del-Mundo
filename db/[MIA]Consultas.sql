@@ -1,5 +1,5 @@
-LOAD DATA LOCAL INFILE 'C:\proyectosNodeJS\Eje-del-Mundo\data\DataCenterData.csv'
-INTO TABLE Temporal
+LOAD DATA LOCAL INFILE '/home/didier/ProyectosNodejs/Eje-del-Mundo/data/DataCenterData.csv'
+    INTO TABLE Temporal
     CHARACTER SET latin1
     FIELDS TERMINATED BY ';'
     LINES TERMINATED BY '\r\n'

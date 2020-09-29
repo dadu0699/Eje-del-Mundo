@@ -3,7 +3,6 @@ CREATE DATABASE practicaMIA;
 USE practicaMIA;
 
 CREATE TEMPORARY TABLE Temporal(
-  idTemporal INT NOT NULL AUTO_INCREMENT,
   nombreCompania VARCHAR(255) NOT NULL,
   contactoCompania VARCHAR(255) NOT NULL,
   correoCompania VARCHAR(255) NOT NULL,
@@ -20,8 +19,7 @@ CREATE TEMPORARY TABLE Temporal(
   producto VARCHAR(255) NOT NULL,
   categoriaProducto VARCHAR(255) NOT NULL,
   cantidad INT NOT NULL,
-  precio DECIMAL(10,2) NOT NULL DEFAULT 0,
-  PRIMARY KEY (idTemporal)
+  precio DECIMAL(10,2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE Compania (
