@@ -15,7 +15,7 @@ mysqlConnection.connect(err => {
         console.error(err);
         return;
     }
-    console.log('Database is connected');
+    console.log(`Database ${params.database} is connected`);
 });
 
 module.exports = mysqlConnection;

@@ -8,4 +8,8 @@ router.get('/', (req, res, next) => {
         title: 'Express'
     });
 });
+
+router.get('/compania', compainaController.getAll);
+router.post('/compania', compainaController.create);
+
 module.exports = router;

@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(morgan('tiny'));
+app.use(morgan('dev'));
 app.use(cors({
     origin: '*'
 }));
