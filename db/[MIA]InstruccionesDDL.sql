@@ -31,8 +31,8 @@ CREATE TABLE Compania (
   PRIMARY KEY (idCompania)
 );
 
-CREATE TABLE ClienteProveedor (
-  idClienteProveedor INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE Persona (
+  idPersona INT NOT NULL AUTO_INCREMENT,
   nombre VARCHAR(255) NOT NULL, 
   correo VARCHAR(255) NOT NULL, 
   telefono VARCHAR(255) NOT NULL, 
@@ -40,9 +40,22 @@ CREATE TABLE ClienteProveedor (
   ciudad VARCHAR(255) NOT NULL,
   codigoPostal INT NOT NULL,
   region VARCHAR(255) NOT NULL,
-  rol CHAR(1) NOT NULL,
-  fechaRegistro DATE NOT NULL, /* Verificar */
-  PRIMARY KEY (idClienteProveedor)
+  fechaRegistro DATE NOT NULL,
+  PRIMARY KEY (idPersona)
+);
+
+CREATE TABLE Cliente (
+  idCliente INT NOT NULL AUTO_INCREMENT,
+  idPersona INT NOT NULL,
+  PRIMARY KEY (idCliente),
+  FOREIGN KEY (idPersona) REFERENCES Persona(idPersona)
+);
+
+CREATE TABLE Proveedor (
+  idProveedor INT NOT NULL AUTO_INCREMENT,
+  idPersona INT NOT NULL,
+  PRIMARY KEY (idProveedor),
+  FOREIGN KEY (idPersona) REFERENCES Persona(idPersona)
 );
 
 CREATE TABLE Producto (
@@ -53,21 +66,40 @@ CREATE TABLE Producto (
   PRIMARY KEY (idProducto)
 );
 
-CREATE TABLE Orden (
-  NoOrden INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE OrdenCompra (
+  NoOrdenCompra INT NOT NULL AUTO_INCREMENT,
   idCompania INT NOT NULL,
-  idClienteProveedor INT NOT NULL,
-  PRIMARY KEY (NoOrden),
+  idCliente INT NOT NULL,
+  PRIMARY KEY (NoOrdenCompra),
   FOREIGN KEY (idCompania) REFERENCES Compania(idCompania),
-  FOREIGN KEY (idClienteProveedor) REFERENCES ClienteProveedor(idClienteProveedor)
+  FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
 );
 
-CREATE TABLE DetalleOrden(
-  NoOrden INT NOT NULL,
+CREATE TABLE DetalleOrdenCompra (
+  NoOrdenCompra INT NOT NULL,
   idProducto INT NOT NULL,
   cantidad INT NOT NULL,
   subTotal INT NOT NULL,
-  PRIMARY KEY(NoOrden, idProducto),
-  FOREIGN KEY(NoOrden) REFERENCES Orden(NoOrden),
-  FOREIGN KEY(idProducto) REFERENCES Producto(idProducto)
+  PRIMARY KEY (NoOrdenCompra, idProducto),
+  FOREIGN KEY (NoOrdenCompra) REFERENCES OrdenCompra(NoOrdenCompra),
+  FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
+);
+
+CREATE TABLE OrdenVenta (
+  NoOrdenVenta INT NOT NULL AUTO_INCREMENT,
+  idCompania INT NOT NULL,
+  idProveedor INT NOT NULL,
+  PRIMARY KEY (NoOrdenVenta),
+  FOREIGN KEY (idCompania) REFERENCES Compania(idCompania),
+  FOREIGN KEY (idProveedor) REFERENCES Proveedor(idProveedor)
+);
+
+CREATE TABLE DetalleOrdenVenta (
+  NoOrdenVenta INT NOT NULL,
+  idProducto INT NOT NULL,
+  cantidad INT NOT NULL,
+  subTotal INT NOT NULL,
+  PRIMARY KEY (NoOrdenVenta, idProducto),
+  FOREIGN KEY (NoOrdenVenta) REFERENCES OrdenVenta(NoOrdenVenta),
+  FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
 );
