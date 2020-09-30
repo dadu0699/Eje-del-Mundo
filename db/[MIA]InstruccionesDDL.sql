@@ -2,26 +2,6 @@ DROP DATABASE IF EXISTS practicaMIA;
 CREATE DATABASE practicaMIA;
 USE practicaMIA;
 
-CREATE TEMPORARY TABLE Temporal(
-  nombreCompania VARCHAR(255) NOT NULL,
-  contactoCompania VARCHAR(255) NOT NULL,
-  correoCompania VARCHAR(255) NOT NULL,
-  telefonoCompania VARCHAR(255) NOT NULL,
-  tipo CHAR(1) NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
-  correo VARCHAR(255) NOT NULL,
-  telefono VARCHAR(255) NOT NULL,
-  fechaRegistro DATE NOT NULL,
-  direccion VARCHAR(255) NOT NULL,
-  ciudad VARCHAR(255) NOT NULL,
-  codigoPostal INT NOT NULL,
-  region VARCHAR(255) NOT NULL,
-  producto VARCHAR(255) NOT NULL,
-  categoriaProducto VARCHAR(255) NOT NULL,
-  cantidad INT NOT NULL,
-  precio DECIMAL(10,2) NOT NULL DEFAULT 0
-);
-
 CREATE TABLE Compania (
   idCompania INT NOT NULL AUTO_INCREMENT,
   nombre VARCHAR(255) NOT NULL,
@@ -102,4 +82,25 @@ CREATE TABLE DetalleOrdenVenta (
   PRIMARY KEY (NoOrdenVenta, idProducto),
   FOREIGN KEY (NoOrdenVenta) REFERENCES OrdenVenta(NoOrdenVenta),
   FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
+);
+
+SET GLOBAL local_infile=1;
+CREATE TEMPORARY TABLE Temporal(
+  nombreCompania VARCHAR(255) NOT NULL,
+  contactoCompania VARCHAR(255) NOT NULL,
+  correoCompania VARCHAR(255) NOT NULL,
+  telefonoCompania VARCHAR(255) NOT NULL,
+  tipo CHAR(1) NOT NULL,
+  nombre VARCHAR(255) NOT NULL,
+  correo VARCHAR(255) NOT NULL,
+  telefono VARCHAR(255) NOT NULL,
+  fechaRegistro DATE NOT NULL,
+  direccion VARCHAR(255) NOT NULL,
+  ciudad VARCHAR(255) NOT NULL,
+  codigoPostal INT NOT NULL,
+  region VARCHAR(255) NOT NULL,
+  producto VARCHAR(255) NOT NULL,
+  categoriaProducto VARCHAR(255) NOT NULL,
+  cantidad INT NOT NULL,
+  precio DECIMAL(10,2) NOT NULL DEFAULT 0
 );
