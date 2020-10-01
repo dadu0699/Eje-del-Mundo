@@ -75,6 +75,42 @@ const consultasController = {
                 data: results
             });
         });
+    },
+    consulta8: (req, res) => {
+        consultas.consulta8((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                data: results
+            });
+        });
+    },
+    consulta9: (req, res) => {
+        consultas.consulta9((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                data: results
+            });
+        });
+    },
+    consulta10: (req, res) => {
+        consultas.consulta10((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                data: results
+            });
+        });
     }
 };
 

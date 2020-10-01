@@ -20,20 +20,22 @@ SELECT cl.idCliente AS 'Numero de cliente', p.nombre AS 'Nombre y apellido',
 
 /* Consulta 3 MAYOR Y MENOR (VENTAS) PEDIDOS REALIZADOS */
 SELECT * FROM (
-    (SELECT p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+    (SELECT p.direccion AS 'Dirección', p.region AS 'Region', 
+        p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
         COUNT(*) AS 'Pedidos' FROM OrdenVenta ov
         INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
         INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
-        GROUP BY p.direccion, p.ciudad, p.codigoPostal
+        GROUP BY p.direccion, p.ciudad, p.codigoPostal, p.region
         HAVING COUNT(*) > 1
         ORDER BY Pedidos DESC
         LIMIT 2) 
     UNION
-    (SELECT p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+    (SELECT p.direccion AS 'Dirección', p.region AS 'Region', 
+        p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
         COUNT(*) AS 'Pedidos' FROM OrdenVenta ov
         INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
         INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
-        GROUP BY p.direccion, p.ciudad, p.codigoPostal
+        GROUP BY p.direccion, p.ciudad, p.codigoPostal, p.region
         HAVING COUNT(*) > 1
         ORDER BY Pedidos ASC
         LIMIT 2)
@@ -92,7 +94,7 @@ SELECT * FROM (
         WHERE c.nombre = 'Fresh Vegetables'
         GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
         ORDER BY Total DESC
-    LIMIT 1)
+    LIMIT 5)
 UNION
     (SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
         p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'
@@ -105,8 +107,43 @@ UNION
         WHERE c.nombre = 'Fresh Vegetables'
         GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
         ORDER BY Total ASC
-    LIMIT 1)
+    LIMIT 5)
 ) a ORDER BY Total DESC;
+
+/* CONSULTA 8 */
+SELECT * FROM (
+    (SELECT p.nombre, p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+        SUM(doc.subTotal) AS 'Total' FROM OrdenCompra oc
+    INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+    INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    GROUP BY cl.idCliente
+    ORDER BY Total DESC
+    LIMIT 5)
+UNION
+    (SELECT p.nombre, p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+        SUM(doc.subTotal) AS 'Total' FROM OrdenCompra oc
+    INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+    INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    GROUP BY cl.idCliente
+    ORDER BY Total ASC
+    LIMIT 5)
+) a ORDER BY Total DESC;
+
+/* CONSULTA 10 */
+SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
+        p.fechaRegistro AS 'Fecha Registro', SUM(doc.cantidad) AS 'Total'
+    FROM DetalleOrdenCompra doc
+    INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+    INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    INNER JOIN Producto prd ON (prd.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = prd.idCategoria)
+    WHERE c.nombre = 'Seafood'
+    GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
+    ORDER BY Total DESC
+    LIMIT 11;
 
 /* CONSULTA 4*/
 SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(oc.idCliente) AS 'ORDENES' FROM OrdenCompra oc
