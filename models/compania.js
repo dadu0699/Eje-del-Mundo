@@ -18,7 +18,7 @@ const compania = {
     },
 
     getAll(callback) {
-        const query = 'SELECT * FROM Compania;'
+        const query = 'SELECT * FROM Compania;';
         return this.executeQuery(query, callback);
     }
 };

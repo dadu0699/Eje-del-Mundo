@@ -65,7 +65,18 @@ const modelo = {
     },
 
     delete(callback) {
-        const query = '';
+        const query = `SET FOREIGN_KEY_CHECKS = 0;
+            DELETE FROM Compania;
+            DELETE FROM Persona;
+            DELETE FROM Cliente;
+            DELETE FROM Proveedor;
+            DELETE FROM Categoria;
+            DELETE FROM Producto;
+            DELETE FROM OrdenCompra;
+            DELETE FROM DetalleOrdenCompra;
+            DELETE FROM OrdenVenta;
+            DELETE FROM DetalleOrdenVenta;
+            SET FOREIGN_KEY_CHECKS = 1;`;
         return this.executeQuery(query, callback);
     }
 };

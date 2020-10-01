@@ -1,117 +1,123 @@
-LOAD DATA LOCAL INFILE '/home/didier/ProyectosNodejs/Eje-del-Mundo/data/DataCenterData.csv'
-    INTO TABLE Temporal
-    CHARACTER SET latin1
-    FIELDS TERMINATED BY ';'
-    LINES TERMINATED BY '\r\n'
-    IGNORE 1 LINES
-    (nombreCompania, contactoCompania, correoCompania, telefonoCompania, tipo, nombre, 
-        correo, telefono, @var_fec, direccion, ciudad, codigoPostal, region, producto, 
-        categoriaProducto, cantidad, precio)
-    SET fechaRegistro = STR_TO_DATE(@var_fec, '%d/%m/%Y');
+/* Consulta 1 ORDEN DE VENTA CON MAYOR TOTAL */
+SELECT p.nombre AS 'Nombre Proveedor', p.telefono AS 'Telefono', 
+	dov.NoOrdenVenta, SUM(dov.subTotal) AS 'Total' FROM DetalleOrdenVenta dov
+    INNER JOIN OrdenVenta ov ON (dov.NoOrdenVenta = ov.NoOrdenVenta)
+    INNER JOIN Proveedor pro ON (ov.idProveedor = pro.idProveedor)
+    INNER JOIN Persona p ON (pro.idPersona = p.idPersona)
+    GROUP BY NoOrdenVenta
+    ORDER BY Total DESC
+    LIMIT 1; 
 
-/* SELECCIONAR USUARIOS O CLIENTES */
-SELECT DISTINCT t.nombre, t.correo, t.telefono, 
-    t.fechaRegistro, t.direccion, t.ciudad, 
-    t.codigoPostal, t.region
-    FROM Temporal t; 
+/* Consulta 2 CLIENTE CON MAS PRODUCTOS COMPRADOS */
+SELECT cl.idCliente AS 'Numero de cliente', p.nombre AS 'Nombre y apellido',
+	SUM(doc.cantidad) AS 'Cantidad productos comprados' FROM DetalleOrdenCompra doc
+    INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+    INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    GROUP BY cl.idCliente
+    ORDER BY SUM(doc.cantidad) DESC
+    LIMIT 1; 
 
-/* INSERTAR PERSONAS DE LA TABLA TEMPORAL */
-INSERT INTO Persona (nombre, correo, telefono, 
-    fechaRegistro, direccion, ciudad, 
-    codigoPostal, region)
-    SELECT DISTINCT t.nombre, t.correo, t.telefono, 
-        t.fechaRegistro, t.direccion, t.ciudad, 
-        t.codigoPostal, t.region
-    FROM Temporal t;
+/* Consulta 3 MAYOR Y MENOR (VENTAS) PEDIDOS REALIZADOS */
+SELECT * FROM (
+    (SELECT p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+        COUNT(*) AS 'Pedidos' FROM OrdenVenta ov
+        INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
+        INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
+        GROUP BY p.direccion, p.ciudad, p.codigoPostal
+        HAVING COUNT(*) > 1
+        ORDER BY Pedidos DESC
+        LIMIT 2) 
+    UNION
+    (SELECT p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+        COUNT(*) AS 'Pedidos' FROM OrdenVenta ov
+        INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
+        INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
+        GROUP BY p.direccion, p.ciudad, p.codigoPostal
+        HAVING COUNT(*) > 1
+        ORDER BY Pedidos ASC
+        LIMIT 2)
+) a ORDER BY Pedidos DESC;
 
-/* INSERTANDO PROVEEDORES */
-INSERT INTO Proveedor (idPersona)
-	SELECT p.idPersona FROM Persona p WHERE p.nombre IN 
-        (SELECT DISTINCT t.nombre FROM Temporal t WHERE t.tipo = 'P');
+/* CONSULTA 5 */
+SELECT * FROM (
+    (SELECT EXTRACT(MONTH FROM p.fechaRegistro) AS 'Mes', p.nombre AS 'Nombre y apellido', 
+        SUM(doc.subTotal) AS 'Total' FROM DetalleOrdenCompra doc
+    INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+    INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    GROUP BY cl.idCliente
+    ORDER BY SUM(doc.subTotal) DESC
+    LIMIT 5)
+UNION
+    (SELECT EXTRACT(MONTH FROM p.fechaRegistro) AS 'Mes', p.nombre AS 'Nombre y apellido', 
+        SUM(doc.subTotal) AS 'Total' FROM DetalleOrdenCompra doc
+    INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+    INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    GROUP BY cl.idCliente
+    ORDER BY SUM(doc.subTotal) ASC
+    LIMIT 5)
+) a ORDER BY Total DESC;
 
-/* INSERTANDO CLIENTES */
-INSERT INTO Cliente (idPersona)
-	SELECT p.idPersona FROM Persona p WHERE p.nombre IN 
-        (SELECT DISTINCT t.nombre FROM Temporal t WHERE t.tipo = 'C');
+/* CONSULTA 6 */
+SELECT * FROM (
+    (SELECT c.nombre, SUM(doc.cantidad) 'Cantidad', 
+	    SUM(doc.cantidad*pr.precio) AS 'Total vendido' FROM DetalleOrdenCompra doc
+    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+    GROUP BY c.nombre
+    ORDER BY Cantidad DESC
+    LIMIT 5)
+UNION
+    (SELECT c.nombre, SUM(doc.cantidad) 'Cantidad', 
+        SUM(doc.cantidad*pr.precio) AS 'Total vendido' FROM DetalleOrdenCompra doc
+    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+    GROUP BY c.nombre
+    ORDER BY Cantidad ASC
+    LIMIT 5)
+) a ORDER BY Cantidad DESC;
 
-/* SELECT COMPANIAS */
-SELECT DISTINCT t.nombreCompania, t.contactoCompania, t.correoCompania, 
-	t.telefonoCompania FROM Temporal t; 
+/* CONSULTA 7 */
+SELECT * FROM (
+    (SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
+        p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'
+        FROM DetalleOrdenVenta dov
+        INNER JOIN OrdenVenta ov ON (dov.NoOrdenVenta = ov.NoOrdenVenta)
+        INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
+        INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
+        INNER JOIN Producto prd ON (prd.idProducto = dov.idProducto)
+        INNER JOIN Categoria c ON (c.idCategoria = prd.idCategoria)
+        WHERE c.nombre = 'Fresh Vegetables'
+        GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
+        ORDER BY Total DESC
+    LIMIT 1)
+UNION
+    (SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
+        p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'
+        FROM DetalleOrdenVenta dov
+        INNER JOIN OrdenVenta ov ON (dov.NoOrdenVenta = ov.NoOrdenVenta)
+        INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
+        INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
+        INNER JOIN Producto prd ON (prd.idProducto = dov.idProducto)
+        INNER JOIN Categoria c ON (c.idCategoria = prd.idCategoria)
+        WHERE c.nombre = 'Fresh Vegetables'
+        GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
+        ORDER BY Total ASC
+    LIMIT 1)
+) a ORDER BY Total DESC;
 
-/* INSERTANDO COMPANIA */
-INSERT INTO Compania (nombre, contacto, correo, telefono)
-    SELECT DISTINCT t.nombreCompania, t.contactoCompania, t.correoCompania, 
-	    t.telefonoCompania FROM Temporal t; 
+/* CONSULTA 4*/
+SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(oc.idCliente) AS 'ORDENES' FROM OrdenCompra oc
+INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+WHERE oc.NoOrdenCompra IN (
+	SELECT doc.NoOrdenCompra FROM DetalleOrdenCompra doc
+    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+    WHERE c.nombre = 'Cheese'
+)
+GROUP BY cl.idCliente
+ORDER BY ORDENES DESC; 
 
-/* INSERTANDO CATEGORIAS */
-INSERT INTO Categoria (nombre)
-    SELECT DISTINCT t.categoriaProducto FROM Temporal t;
-
-/* INSERTANDO PRODUCTOS */
-INSERT INTO Producto (idCategoria, nombre, precio)
-    SELECT DISTINCT c.idCategoria, t.producto, t.precio FROM Temporal t
-	    INNER JOIN Categoria c ON (t.categoriaProducto = c.nombre);
-
-/* SELECT COMPANIA CLIENTE */
-SELECT DISTINCT cm.idCompania, cm.nombre, cl.idCliente, p.nombre FROM Temporal t
-	INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-	INNER JOIN Persona p ON (p.nombre = t.nombre)
-	INNER JOIN Cliente cl ON (cl.idPersona = p.idPersona);
-
-/* INSERTANDO ORDEN DE COMPRA */
-INSERT INTO OrdenCompra(idCompania, idCliente)
-    SELECT DISTINCT cm.idCompania, cl.idCliente FROM Temporal t
-        INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-        INNER JOIN Persona p ON (p.nombre = t.nombre)
-        INNER JOIN Cliente cl ON (cl.idPersona = p.idPersona);
-
-/* SELECT COMPANIA PROVEEDOR */
-SELECT DISTINCT cm.idCompania, cm.nombre, pr.idProveedor, p.nombre FROM Temporal t 
-	INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-	INNER JOIN Persona p ON (p.nombre = t.nombre)
-	INNER JOIN Proveedor pr ON (pr.idPersona = p.idPersona);
-
-/* INSERTANDO ORDEN DE VENTA */
-INSERT INTO OrdenVenta(idCompania, idProveedor)
-    SELECT DISTINCT cm.idCompania, pr.idProveedor FROM Temporal t 
-        INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-        INNER JOIN Persona p ON (p.nombre = t.nombre)
-        INNER JOIN Proveedor pr ON (pr.idPersona = p.idPersona);
-
-/* SELECT DETALLE ODEN COMPRA */
-SELECT oc.NoOrdenCompra, prod.idProducto, prod.nombre AS 'Producto', 
-	cl.idCliente, p.nombre AS 'Cliente', cm.idCompania, 
-    cm.nombre AS 'Compania', t.cantidad, (t.cantidad*prod.precio) FROM Temporal t
-    INNER JOIN Persona p ON (p.nombre = t.nombre)
-    INNER JOIN Cliente cl ON (cl.idPersona = p.idPersona)
-    INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-    INNER JOIN Producto prod ON (prod.nombre = t.producto)
-    INNER JOIN OrdenCompra oc ON (oc.idCliente = cl.idCliente AND oc.idCompania = cm.idCompania); 
-
-/* INSERTANDO DETALLE ORDEN COMPRA */
-INSERT INTO DetalleOrdenCompra(NoOrdenCompra, idProducto, cantidad, subTotal)
-	SELECT oc.NoOrdenCompra, prod.idProducto, t.cantidad, (t.cantidad*prod.precio) FROM Temporal t
-	INNER JOIN Persona p ON (p.nombre = t.nombre)
-	INNER JOIN Cliente cl ON (cl.idPersona = p.idPersona)
-	INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-	INNER JOIN Producto prod ON (prod.nombre = t.producto)
-	INNER JOIN OrdenCompra oc ON (oc.idCliente = cl.idCliente AND oc.idCompania = cm.idCompania); 
-
-/* SELECT DETALLE ODEN VENTA */
-SELECT ov.NoOrdenVenta, prod.idProducto, prod.nombre AS 'Producto', 
-	pr.idProveedor, p.nombre AS 'Proveedor', cm.idCompania, 
-    cm.nombre AS 'Compania', t.cantidad, (t.cantidad*prod.precio) FROM Temporal t
-    INNER JOIN Persona p ON (p.nombre = t.nombre)
-    INNER JOIN Proveedor pr ON (pr.idPersona = p.idPersona)
-    INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-    INNER JOIN Producto prod ON (prod.nombre = t.producto)
-    INNER JOIN OrdenVenta ov ON (ov.idProveedor = pr.idProveedor AND ov.idCompania = cm.idCompania); 
-
-/* INSERTANDO DETALLE ORDEN COMPRA */
-INSERT INTO DetalleOrdenVenta (NoOrdenVenta, idProducto, cantidad, subTotal)
-    SELECT ov.NoOrdenVenta, prod.idProducto, t.cantidad, (t.cantidad*prod.precio) FROM Temporal t
-    INNER JOIN Persona p ON (p.nombre = t.nombre)
-    INNER JOIN Proveedor pr ON (pr.idPersona = p.idPersona)
-    INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
-    INNER JOIN Producto prod ON (prod.nombre = t.producto)
-    INNER JOIN OrdenVenta ov ON (ov.idProveedor = pr.idProveedor AND ov.idCompania = cm.idCompania); 
