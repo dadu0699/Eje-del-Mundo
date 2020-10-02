@@ -76,7 +76,7 @@ const consultas = {
     },
     consulta6(callback) {
         const query = `SELECT * FROM (
-                (SELECT c.nombre, SUM(doc.cantidad) 'Cantidad', 
+                (SELECT c.nombre AS 'Categoria', SUM(doc.cantidad) 'Cantidad', 
                     SUM(doc.cantidad*pr.precio) AS 'Total vendido' FROM DetalleOrdenCompra doc
                 INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
                 INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
@@ -84,14 +84,14 @@ const consultas = {
                 ORDER BY Cantidad DESC
                 LIMIT 5)
             UNION
-                (SELECT c.nombre, SUM(doc.cantidad) 'Cantidad', 
+                (SELECT c.nombre AS 'Categoria', SUM(doc.cantidad) 'Cantidad', 
                     SUM(doc.cantidad*pr.precio) AS 'Total vendido' FROM DetalleOrdenCompra doc
                 INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
                 INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
                 GROUP BY c.nombre
                 ORDER BY Cantidad ASC
                 LIMIT 5)
-            ) a ORDER BY Cantidad DESC;`;
+            ) a ORDER BY Cantidad DESC;`; // TODO VERIFICAR SI SOLO SON 1 DE CADA UNO
         return this.executeQuery(query, callback);
     },
     consulta7(callback) {
@@ -126,7 +126,8 @@ const consultas = {
     },
     consulta8(callback) {
         const query = `SELECT * FROM (
-                (SELECT p.nombre, p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+                (SELECT p.nombre AS 'Cliente', p.direccion AS 'Dirección', p.region AS 'Region', 
+                    p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
                     SUM(doc.subTotal) AS 'Total' FROM OrdenCompra oc
                 INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
                 INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
@@ -135,7 +136,8 @@ const consultas = {
                 ORDER BY Total DESC
                 LIMIT 5)
             UNION
-                (SELECT p.nombre, p.direccion AS 'Dirección', p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
+                (SELECT p.nombre AS 'Cliente', p.direccion AS 'Dirección', p.region AS 'Region', 
+                    p.ciudad AS 'Ciudad', p.codigoPostal AS 'Código Postal',
                     SUM(doc.subTotal) AS 'Total' FROM OrdenCompra oc
                 INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
                 INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
@@ -155,7 +157,7 @@ const consultas = {
             INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
             GROUP BY ov.NoOrdenVenta
             ORDER BY Pedidos ASC, Total ASC
-            LIMIT 2;`;
+            LIMIT 12;`; // TODO VERIFICAR SI SON LOS 12
         return this.executeQuery(query, callback);
     },
     consulta10(callback) {
