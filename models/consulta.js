@@ -95,33 +95,18 @@ const consultas = {
         return this.executeQuery(query, callback);
     },
     consulta7(callback) {
-        const query = `SELECT * FROM (
-                (SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
-                    p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'
-                    FROM DetalleOrdenVenta dov
-                    INNER JOIN OrdenVenta ov ON (dov.NoOrdenVenta = ov.NoOrdenVenta)
-                    INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
-                    INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
-                    INNER JOIN Producto prd ON (prd.idProducto = dov.idProducto)
-                    INNER JOIN Categoria c ON (c.idCategoria = prd.idCategoria)
-                    WHERE c.nombre = 'Fresh Vegetables'
-                    GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
-                    ORDER BY Total DESC
-                LIMIT 5)
-            UNION
-                (SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
-                    p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'
-                    FROM DetalleOrdenVenta dov
-                    INNER JOIN OrdenVenta ov ON (dov.NoOrdenVenta = ov.NoOrdenVenta)
-                    INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
-                    INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
-                    INNER JOIN Producto prd ON (prd.idProducto = dov.idProducto)
-                    INNER JOIN Categoria c ON (c.idCategoria = prd.idCategoria)
-                    WHERE c.nombre = 'Fresh Vegetables'
-                    GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
-                    ORDER BY Total ASC
-                LIMIT 5)
-            ) a ORDER BY Total DESC;`;
+        const query = `SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
+                p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'
+                FROM DetalleOrdenVenta dov
+                INNER JOIN OrdenVenta ov ON (dov.NoOrdenVenta = ov.NoOrdenVenta)
+                INNER JOIN Proveedor pr ON (ov.idProveedor = pr.idProveedor)
+                INNER JOIN Persona p ON (pr.idPersona = p.idPersona)
+                INNER JOIN Producto prd ON (prd.idProducto = dov.idProducto)
+                INNER JOIN Categoria c ON (c.idCategoria = prd.idCategoria)
+                WHERE c.nombre = 'Fresh Vegetables'
+                GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
+                ORDER BY Total DESC
+            LIMIT 5;`;
         return this.executeQuery(query, callback);
     },
     consulta8(callback) {
