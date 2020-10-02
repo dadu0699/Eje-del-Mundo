@@ -111,6 +111,57 @@ const consultasController = {
                 data: results
             });
         });
+    },
+    consulta4: (req, res) => {
+        consultas.consulta4((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                data: results
+            });
+        });
+    },
+    consulta41: (req, res) => {
+        consultas.consulta41((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                title: 'DETALLES DE ORDENES SOLO CON MARCA Cheese',
+                data: results
+            });
+        });
+    },
+    consulta42: (req, res) => {
+        consultas.consulta42((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                title: 'CLIENTES QUE COMPRARON MAS PRODUCTOS DE LA MARCA Cheese',
+                data: results
+            });
+        });
+    },
+    consulta43: (req, res) => {
+        consultas.consulta43((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                title: 'CLIENTES QUE COMPRARON PRODCUTOS DE LA MARCA Cheese',
+                data: results
+            });
+        });
     }
 };
 

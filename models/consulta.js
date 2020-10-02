@@ -53,9 +53,6 @@ const consultas = {
             ) a ORDER BY Pedidos DESC;`;
         return this.executeQuery(query, callback);
     },
-
-
-
     consulta5(callback) {
         const query = `SELECT * FROM ((SELECT EXTRACT(MONTH FROM p.fechaRegistro) AS 'Mes', p.nombre AS 'Nombre y apellido', 
             SUM(doc.subTotal) AS 'Total' FROM DetalleOrdenCompra doc
@@ -174,6 +171,80 @@ const consultas = {
             GROUP BY p.nombre, p.correo, p.telefono, p.fechaRegistro
             ORDER BY Total DESC
             LIMIT 11;`;
+        return this.executeQuery(query, callback);
+    },
+    consulta4(callback) {
+        const query = `SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(*) AS 'Ordenes', prueba.Total
+                FROM OrdenCompra oc
+            INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+            INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+            INNER JOIN
+                (SELECT cl.idCliente, SUM(doc.subTotal) AS 'Total'
+                    FROM OrdenCompra oc
+                INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+                INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+                GROUP BY cl.idCliente) prueba ON (prueba.idCliente = cl.idCliente)
+            WHERE cl.idCliente IN (SELECT idCliente FROM (SELECT cl.idCliente, SUM(doc.cantidad) AS 'Cantidad' FROM DetalleOrdenCompra doc
+                INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+                INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+                INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+                INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+                INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+                WHERE c.nombre = 'Cheese'
+                GROUP BY cl.idCliente
+                ORDER BY Cantidad DESC
+                LIMIT 5) AS temp)
+            GROUP BY cl.idCliente
+            ORDER BY Ordenes DESC;`;
+        return this.executeQuery(query, callback);
+    },
+    consulta41(callback) {
+        const query = `SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(oc.idCliente) AS 'ORDENES' FROM OrdenCompra oc
+            INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+            INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+            INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+            WHERE doc.idDetalleOrdenCompra IN (
+                SELECT doc.idDetalleOrdenCompra FROM DetalleOrdenCompra doc
+                INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+                INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+                WHERE c.nombre = 'Cheese'
+            )
+            GROUP BY cl.idCliente
+            ORDER BY ORDENES DESC;`;
+        return this.executeQuery(query, callback);
+    },
+    consulta42(callback) {
+        const query = `SELECT cl.idCliente, p.nombre, SUM(doc.cantidad) AS 'Cantidad Producto Marca Cheese' FROM DetalleOrdenCompra doc
+            INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+            INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+            INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+            INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+            INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+            WHERE c.nombre = 'Cheese'
+            GROUP BY cl.idCliente
+            ORDER BY SUM(doc.cantidad) DESC`;
+        return this.executeQuery(query, callback);
+    },
+    consulta43(callback) {
+        const query = `SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(*) AS 'Ordenes', prueba.Total
+                FROM OrdenCompra oc
+            INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+            INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+            INNER JOIN
+                (SELECT cl.idCliente, SUM(doc.subTotal) AS 'Total'
+                    FROM OrdenCompra oc
+                INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+                INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+                GROUP BY cl.idCliente) prueba ON (prueba.idCliente = cl.idCliente)
+            WHERE cl.idCliente IN (SELECT cl.idCliente FROM DetalleOrdenCompra doc
+                INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+                INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+                INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+                INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+                INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+                WHERE c.nombre = 'Cheese')
+            GROUP BY cl.idCliente
+            ORDER BY Ordenes DESC;`;
         return this.executeQuery(query, callback);
     }
 };

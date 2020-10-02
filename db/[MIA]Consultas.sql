@@ -146,11 +146,37 @@ SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
     LIMIT 11;
 
 /* CONSULTA 4*/
+SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(*) AS 'Ordenes', prueba.Total
+	FROM OrdenCompra oc
+INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+INNER JOIN
+	(SELECT cl.idCliente, SUM(doc.subTotal) AS 'Total'
+		FROM OrdenCompra oc
+	INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+	INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+	GROUP BY cl.idCliente) prueba ON (prueba.idCliente = cl.idCliente)
+WHERE cl.idCliente IN (SELECT idCliente FROM (SELECT cl.idCliente, SUM(doc.cantidad) AS 'Cantidad' FROM DetalleOrdenCompra doc
+	INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+	INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+	INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+    WHERE c.nombre = 'Cheese'
+    GROUP BY cl.idCliente
+    ORDER BY Cantidad DESC
+    LIMIT 5) AS temp)
+GROUP BY cl.idCliente
+ORDER BY Ordenes DESC;
+
+
+/* DETALLES DE ORDENES SOLO CON MARCA Cheese */
 SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(oc.idCliente) AS 'ORDENES' FROM OrdenCompra oc
 INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
 INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
-WHERE oc.NoOrdenCompra IN (
-	SELECT doc.NoOrdenCompra FROM DetalleOrdenCompra doc
+INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+WHERE doc.idDetalleOrdenCompra IN (
+	SELECT doc.idDetalleOrdenCompra FROM DetalleOrdenCompra doc
     INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
     INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
     WHERE c.nombre = 'Cheese'
@@ -158,3 +184,35 @@ WHERE oc.NoOrdenCompra IN (
 GROUP BY cl.idCliente
 ORDER BY ORDENES DESC; 
 
+/* CLIENTES QUE COMPRARON MAS PRODUCTOS DE LA MARCA Cheese */
+SELECT cl.idCliente, p.nombre, SUM(doc.cantidad) AS 'Cantidad Producto Marca Cheese' FROM DetalleOrdenCompra doc
+	INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+	INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+	INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+    WHERE c.nombre = 'Cheese'
+    GROUP BY cl.idCliente
+    ORDER BY SUM(doc.cantidad) DESC
+    LIMIT 5
+
+/* CLIENTES QUE COMPRARON PRODCUTOS DE LA MARCA Cheese */
+SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', COUNT(*) AS 'Ordenes', prueba.Total
+	FROM OrdenCompra oc
+INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+INNER JOIN
+	(SELECT cl.idCliente, SUM(doc.subTotal) AS 'Total'
+		FROM OrdenCompra oc
+	INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
+	INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+	GROUP BY cl.idCliente) prueba ON (prueba.idCliente = cl.idCliente)
+WHERE cl.idCliente IN (SELECT cl.idCliente FROM DetalleOrdenCompra doc
+	INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+	INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+	INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+    WHERE c.nombre = 'Cheese')
+GROUP BY cl.idCliente
+ORDER BY Ordenes DESC;

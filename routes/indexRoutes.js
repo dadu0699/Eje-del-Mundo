@@ -24,12 +24,16 @@ router.get('/eliminarModelo', modeloController.delete);
 router.get('/consulta1', consultaController.consulta1);
 router.get('/consulta2', consultaController.consulta2);
 router.get('/consulta3', consultaController.consulta3);
-
 router.get('/consulta5', consultaController.consulta5);
 router.get('/consulta6', consultaController.consulta6);
 router.get('/consulta7', consultaController.consulta7);
 router.get('/consulta8', consultaController.consulta8);
 router.get('/consulta9', consultaController.consulta9);
 router.get('/consulta10', consultaController.consulta10);
+
+router.get('/consulta4', consultaController.consulta4);
+router.get('/consulta41', consultaController.consulta41);
+router.get('/consulta42', consultaController.consulta42);
+router.get('/consulta43', consultaController.consulta43);
 
 module.exports = router;
