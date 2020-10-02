@@ -93,6 +93,21 @@ CREATE TABLE DetalleOrdenVenta (
   FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
 );
 
+CREATE TABLE Region (
+  idRegion INT NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(255) NOT NULL, 
+  PRIMARY KEY (idRegion)
+);
+
+CREATE TABLE Ciudad (
+  idCiudad INT NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(255) NOT NULL, 
+  codigoPostal INT NOT NULL,
+  idRegion INT NOT NULL,
+  PRIMARY KEY (idCiudad),
+  FOREIGN KEY (idRegion) REFERENCES Region(idRegion)
+);
+
 SET GLOBAL local_infile=1;
 CREATE TEMPORARY TABLE Temporal (
   nombreCompania VARCHAR(255) NOT NULL,

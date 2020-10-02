@@ -116,6 +116,13 @@ INSERT INTO DetalleOrdenVenta (NoOrdenVenta, idProducto, cantidad, subTotal)
     INNER JOIN Producto prod ON (prod.nombre = t.producto)
     INNER JOIN OrdenVenta ov ON (ov.idProveedor = pr.idProveedor AND ov.idCompania = cm.idCompania); 
 
+INSERT INTO Region (nombre)
+    SELECT DISTINCT t.region FROM Temporal t;
+
+INSERT INTO Ciudad (nombre, codigoPostal, idRegion)
+    SELECT DISTINCT t.ciudad, t.codigoPostal, r.idRegion FROM Temporal t
+    INNER JOIN Region r ON (t.region = r.nombre);
+
 DROP TEMPORARY TABLE Temporal;
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -129,4 +136,6 @@ DELETE FROM OrdenCompra;
 DELETE FROM DetalleOrdenCompra;
 DELETE FROM OrdenVenta;
 DELETE FROM DetalleOrdenVenta;
+DELETE FROM Region;
+DELETE FROM Ciudad;
 SET FOREIGN_KEY_CHECKS = 1;

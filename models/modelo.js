@@ -60,7 +60,14 @@ const modelo = {
                 INNER JOIN Proveedor pr ON (pr.idPersona = p.idPersona)
                 INNER JOIN Compania cm ON (cm.nombre = t.nombreCompania)
                 INNER JOIN Producto prod ON (prod.nombre = t.producto)
-                INNER JOIN OrdenVenta ov ON (ov.idProveedor = pr.idProveedor AND ov.idCompania = cm.idCompania);`;
+                INNER JOIN OrdenVenta ov ON (ov.idProveedor = pr.idProveedor AND ov.idCompania = cm.idCompania);
+                            
+            INSERT INTO Region (nombre)
+                SELECT DISTINCT t.region FROM Temporal t;
+
+            INSERT INTO Ciudad (nombre, codigoPostal, idRegion)
+                SELECT DISTINCT t.ciudad, t.codigoPostal, r.idRegion FROM Temporal t
+                INNER JOIN Region r ON (t.region = r.nombre);`;
         return this.executeQuery(query, callback);
     },
 
@@ -76,6 +83,8 @@ const modelo = {
             DELETE FROM DetalleOrdenCompra;
             DELETE FROM OrdenVenta;
             DELETE FROM DetalleOrdenVenta;
+            DELETE FROM Region;
+            DELETE FROM Ciudad;
             SET FOREIGN_KEY_CHECKS = 1;`;
         return this.executeQuery(query, callback);
     }
