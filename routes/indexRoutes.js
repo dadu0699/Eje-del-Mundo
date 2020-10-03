@@ -35,7 +35,7 @@ router.get('/consulta41', consultaController.consulta41);
 router.get('/consulta42', consultaController.consulta42);
 router.get('/consulta43', consultaController.consulta43);
 
-router.get('/consulta6', consultaController.consulta6);
-router.get('/consulta61', consultaController.consulta61);
+router.get('/consulta61', consultaController.consulta6);
+router.get('/consulta6', consultaController.consulta61);
 
 module.exports = router;
