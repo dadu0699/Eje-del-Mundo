@@ -94,6 +94,26 @@ const consultas = {
             ) a ORDER BY Cantidad DESC;`;
         return this.executeQuery(query, callback);
     },
+    consulta61(callback) {
+        const query = `SELECT * FROM (
+                (SELECT c.nombre AS 'Categoria', SUM(doc.cantidad) 'Cantidad', 
+                    SUM(doc.cantidad*pr.precio) AS 'Total' FROM DetalleOrdenCompra doc
+                INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+                INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+                GROUP BY c.nombre
+                ORDER BY Total DESC
+                LIMIT 5)
+            UNION
+                (SELECT c.nombre AS 'Categoria', SUM(doc.cantidad) 'Cantidad', 
+                    SUM(doc.cantidad*pr.precio) AS 'Total' FROM DetalleOrdenCompra doc
+                INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+                INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
+                GROUP BY c.nombre
+                ORDER BY Total ASC
+                LIMIT 5)
+            ) a ORDER BY Total DESC;`;
+        return this.executeQuery(query, callback);
+    },
     consulta7(callback) {
         const query = `SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
                 p.fechaRegistro AS 'Fecha Registro', SUM(dov.subTotal) AS 'Total'

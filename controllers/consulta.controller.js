@@ -64,6 +64,18 @@ const consultasController = {
             });
         });
     },
+    consulta61: (req, res) => {
+        consultas.consulta61((err, results) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.status(200).send({
+                code: '200',
+                data: results
+            });
+        });
+    },
     consulta7: (req, res) => {
         consultas.consulta7((err, results) => {
             if (err) {
