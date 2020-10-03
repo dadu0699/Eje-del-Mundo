@@ -181,40 +181,26 @@ const consultas = {
         return this.executeQuery(query, callback);
     },
     consulta4(callback) {
-        const query = `SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', ord.Ordenes, dt.DetalleOrden AS 'Detalles de Orden', 
-                ct.Cantidad FROM Cliente cl
+        const query = `SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', SUM(doc.cantidad) AS 'Cantidad', 
+                ord.Ordenes, COUNT(oc.idCliente) AS 'DetalleOrden',
+                SUM(subTotal) AS 'Total Gastado'
+            FROM DetalleOrdenCompra doc
+            INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+            INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
             INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
-            INNER JOIN
-                (SELECT cl.idCliente, COUNT(oc.idCliente) AS 'DetalleOrden' FROM OrdenCompra oc
-                INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
-                INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
-                INNER JOIN DetalleOrdenCompra doc ON (oc.NoOrdenCompra = doc.NoOrdenCompra)
-                WHERE doc.idDetalleOrdenCompra IN (
-                    SELECT doc.idDetalleOrdenCompra FROM DetalleOrdenCompra doc
-                    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
-                    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
-                    WHERE c.nombre = 'Cheese'
-                )
-                GROUP BY cl.idCliente) dt ON (cl.idCliente = dt.idCliente)
-            INNER JOIN
-                (SELECT cl.idCliente, SUM(doc.cantidad) AS 'Cantidad' FROM DetalleOrdenCompra doc
-                    INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
-                    INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
-                    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
-                    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
-                    WHERE c.nombre = 'Cheese'
-                    GROUP BY cl.idCliente) ct ON (cl.idCliente = ct.idCliente)
-            INNER JOIN
-                (SELECT cl.idCliente, COUNT(oc.idCliente) AS 'Ordenes' FROM OrdenCompra oc
-                INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
-                WHERE oc.NoOrdenCompra IN (
-                    SELECT doc.NoOrdenCompra FROM DetalleOrdenCompra doc
-                    INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
-                    INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria)
-                    WHERE c.nombre = 'Cheese'
-                )
-                GROUP BY cl.idCliente) ord ON (cl.idCliente = ord.idCliente)
-            ORDER BY ct.Cantidad DESC
+            INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+            INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria AND c.nombre = 'Cheese')
+            INNER JOIN (
+                    SELECT oc.idCliente, COUNT(oc.idCliente) AS 'Ordenes' FROM OrdenCompra oc
+                    WHERE oc.NoOrdenCompra IN (
+                        SELECT doc.NoOrdenCompra FROM DetalleOrdenCompra doc
+                        INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+                        INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria AND c.nombre = 'Cheese')
+                        )
+                    GROUP BY oc.idCliente
+                ) ord ON (ord.idCliente = cl.idCliente)
+            GROUP BY cl.idCliente
+            ORDER BY Cantidad DESC
             LIMIT 5;`;
         return this.executeQuery(query, callback);
     },

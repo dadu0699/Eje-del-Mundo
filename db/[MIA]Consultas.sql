@@ -157,6 +157,28 @@ SELECT p.nombre AS 'Nombre', p.correo AS 'Correo', p.telefono AS 'Telefono',
     LIMIT 11;
 
 /* CONSULTA 4*/
+SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', SUM(doc.cantidad) AS 'Cantidad', 
+	ord.Ordenes, COUNT(oc.idCliente) AS 'DetalleOrden',
+    SUM(subTotal) AS 'Total Gastado'
+FROM DetalleOrdenCompra doc
+INNER JOIN OrdenCompra oc ON (doc.NoOrdenCompra = oc.NoOrdenCompra)
+INNER JOIN Cliente cl ON (oc.idCliente = cl.idCliente)
+INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
+INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria AND c.nombre = 'Cheese')
+INNER JOIN (
+		SELECT oc.idCliente, COUNT(oc.idCliente) AS 'Ordenes' FROM OrdenCompra oc
+		WHERE oc.NoOrdenCompra IN (
+			SELECT doc.NoOrdenCompra FROM DetalleOrdenCompra doc
+			INNER JOIN Producto pr ON (pr.idProducto = doc.idProducto)
+			INNER JOIN Categoria c ON (c.idCategoria = pr.idCategoria AND c.nombre = 'Cheese')
+			)
+		GROUP BY oc.idCliente
+    ) ord ON (ord.idCliente = cl.idCliente)
+GROUP BY cl.idCliente
+ORDER BY Cantidad DESC
+LIMIT 5;
+
 SELECT cl.idCliente, p.nombre AS 'Nombre y Apellido', ord.Ordenes, dt.DetalleOrden AS 'Detalle Orden', 
 	ct.Cantidad FROM Cliente cl
 INNER JOIN Persona p ON (cl.idPersona = p.idPersona)
