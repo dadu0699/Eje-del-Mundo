@@ -4,6 +4,9 @@ const cors = require('cors');
 const path = require('path');
 
 const indexRouter = require('./routes/indexRoutes');
+const consultaRouter = require('./routes/consulta');
+const temporalRouter = require('./routes/temporal');
+const modeloRouter = require('./routes/modelo');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +25,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes 
 app.use('/', indexRouter);
+app.use('/temporal', temporalRouter);
+app.use('/consulta', consultaRouter);
+app.use('/modelo', modeloRouter);
 
 
 // Port assignment
